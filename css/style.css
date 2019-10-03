@@ -7,7 +7,7 @@
 canvas {
   background: url('../images/nebula.gif') center;
   /* https://i.pinimg.com/originals/b1/bd/c1/b1bdc1ae539dcbd1a7c33cef3e5f2d9a.gif */
-  animation: 120s scroll infinite linear reverse;
+  animation: 120s scroll infinite linear reverse; /* https://scrummish.github.io/Space-Invaders-2018/ */
   background-size: cover;
   margin: 0 auto;
   display: block;
@@ -17,4 +17,8 @@ canvas {
   100%{
     background-position:0px -30000px;
   }
+}
+
+#time {
+  display: inline;
 }

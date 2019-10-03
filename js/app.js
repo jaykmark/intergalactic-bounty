@@ -27,29 +27,30 @@ let yFinish = canvas.height - 650;
 let obstacleRadius = 10; // make it a variable later
 
 // Overall speed of game
-let startSpeed = 0.5;
-let maxSpeed = 3;
+let startSpeed = 1;
+let maxSpeed = 8;
 
 const gameSpeed = setInterval(() => {
-    startSpeed += 0.25;
+    startSpeed += 0.5;
     console.log(startSpeed);
     if (startSpeed >= maxSpeed) {
       clearInterval(gameSpeed);
     }
-  }, 300)
+  }, 500)
 
 
 // Overall Distance (allows for finish line)
-let distance = 30;
+let distance = 300;
 
 // Distance is calculated every second
 const distanceToFinish = setInterval(() => {
   distance -= startSpeed;
-  console.log(`Distance to Finish: ${distance}`);
+  // console.log(`Distance to Finish: ${distance}`);
   if (distance <= 0) {
     clearInterval(distanceToFinish);
+    distance = 0;
   }
-}, 1000);
+}, 750);
 
 // Key Press Default State 
 let rightPressed = false;
@@ -80,17 +81,34 @@ function keyUpHandler(e) {
 // Timer (currently set every second)
 const timer = setInterval(() => {
   time++;
+  Number.time;
   if (distance <= 0) {
     clearInterval(timer);
   }
-}, 1000)
+}, 10)
 
+const convertTime = (time) => { // Carson
+  let totalSeconds = (time/100);
+  let minutes = Math.floor(totalSeconds/60)
+  let remainingSeconds = Math.floor(totalSeconds % 60)
+  let remainingMiliseconds = time % 100
+  let roundedMS = Math.floor(remainingMiliseconds)
+  return(`${minutes}:${remainingSeconds}:${roundedMS}`)
+  }
 
 const drawTime = () => {
-  ctx.font = "48px Arial";
-  ctx.fillStyle - "#FFFFFF";
-  ctx.fillText(`TIME: ${time}`, canvas.width / 2 - 100, 60);
+  ctx.font = "48px Bungee Inline";
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fillText(`${convertTime(time)}`, canvas.width / 2 - 75, 75);
 }
+
+const drawDistance = () => {
+  ctx.font = "18px Bungee Inline";
+  ctx.fillstyle = "#FFFFFF";
+  ctx.fillText(`${distance}`, canvas.width - 465, canvas.height - 40);
+  ctx.fillText('Light Years Away', canvas.width - 465, canvas.height - 15);
+}
+
 // Millisecond to string format
 // const milisecondTimer = (time) => {
 //   // let msec_num = parseInt(this, 10);
@@ -160,6 +178,7 @@ const draw = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawRacer();
   drawTime();
+  drawDistance();
   drawObstacleLeft();
   drawObstacleMiddle();
   drawObstacleRight();
