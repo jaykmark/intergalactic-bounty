@@ -7,10 +7,10 @@ const ctx = canvas.getContext("2d");
 let time = 0;
 let framesPerSecond = 200;
 
-// Car Dimensions
-let carHeight = 125;
-let carWidth = 75;
-let carX = (canvas.width - carWidth) / 2;
+// racer Dimensions
+let racerHeight = 125;
+let racerWidth = 75;
+let racerX = (canvas.width - racerWidth) / 2;
 
 // Obstacle Position / Dimensions
 let xLeft = canvas.width / 4 - 25;
@@ -31,11 +31,13 @@ let startSpeed = 0.5;
 let maxSpeed = 3;
 
 const gameSpeed = setInterval(() => {
-  while (startSpeed < maxSpeed) {
     startSpeed += 0.25;
     console.log(startSpeed);
-  }
-}, 1000);
+    if (startSpeed >= maxSpeed) {
+      clearInterval(gameSpeed);
+    }
+  }, 300)
+
 
 // Overall Distance (allows for finish line)
 let distance = 30;
@@ -44,7 +46,7 @@ let distance = 30;
 const distanceToFinish = setInterval(() => {
   distance -= startSpeed;
   console.log(`Distance to Finish: ${distance}`);
-  if (distance === 0) {
+  if (distance <= 0) {
     clearInterval(distanceToFinish);
   }
 }, 1000);
@@ -75,26 +77,39 @@ function keyUpHandler(e) {
   }
 }
 
-// Logs times every second
+// Timer (currently set every second)
 const timer = setInterval(() => {
   time++;
-  if (distance === 0) {
+  if (distance <= 0) {
     clearInterval(timer);
   }
 }, 1000)
 
+
 const drawTime = () => {
   ctx.font = "48px Arial";
-  ctx.fillStyle - "#FF0000";
-  ctx.fillText(`TIME: ${time}`, canvas.width / 2 - 100, 75);
+  ctx.fillStyle - "#FFFFFF";
+  ctx.fillText(`TIME: ${time}`, canvas.width / 2 - 100, 60);
 }
+// Millisecond to string format
+// const milisecondTimer = (time) => {
+//   // let msec_num = parseInt(this, 10);
+//   let min = Math.floor(time / 6000);
+//   let sec = Math.floor((time - (min * 6000)) / 100)
+//   let milisec = time - (min * 6000) - (minutes * 60);
+//   if (min < 10) {min = "0" + min}
+//   if (sec < 10) {sec = "0" + sec}
+//   if (milisec < 10) {milisec = "0" + milisec}
+//   return `${min}:${sec}:${milisec}`;
+// }
 
-const drawCar = () => {
+const drawRacer = () => {
     ctx.beginPath();
-    let car = new Image();
-    car.src = "./images/car.png";
-    // car.onload = function() {
-        ctx.drawImage(car, carX, canvas.height - carHeight * 1.5, carWidth, carHeight);
+    let racer = new Image();
+    // https://myrealdomain.com/images/8-bit-spaceship-1.png
+    racer.src = "./images/cruiser.png";
+    // racer.onload = function() {
+        ctx.drawImage(racer, racerX, canvas.height - racerHeight * 1.33, racerWidth, racerHeight);
     // }
     ctx.closePath();
   }
@@ -108,13 +123,19 @@ const drawObstacleLeft = () => {
   ctx.closePath();
 }
 
+// Create Obstacle
+let obstacles = [];
+for (let i = 0; i < 2; i++) {
+  obstacles[i] = {x: 0, y: 0, status: 1};
+}
+
 // Obstacle in Middle Lane
 const drawObstacleMiddle = () => {
-  ctx.beginPath();
-  ctx.arc(xMiddle, yMiddle, obstacleRadius, 10, 0, Math.PI*2);
-  ctx.fillStyle = "#FF1301";
-  ctx.fill();
-  ctx.closePath();
+    ctx.beginPath();
+    ctx.arc(xMiddle, yMiddle, obstacleRadius, 10, 0, Math.PI*2);
+    ctx.fillStyle = "#FF1301";
+    ctx.fill();
+    ctx.closePath();
 }
 
 // Obstacle in Right Lane
@@ -137,27 +158,34 @@ const drawFinish = () => {
 // Overall Function to Run Game
 const draw = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  drawCar();
+  drawRacer();
   drawTime();
   drawObstacleLeft();
   drawObstacleMiddle();
   drawObstacleRight();
 
-  // if (distance === 15) {
-    drawFinish();
-  // }
+  // Tries to make a finish line at end
+  // if (distance <= 3) {
+  //   drawFinish();
+  //   } 
+
+  // If obstacle hits racer, slow down and make it disappear
+  if (xMiddle > racerX && xMiddle < racerX + racerWidth && yMiddle + startSpeed < racerHeight && yMiddle + startSpeed > canvas.height - racerHeight * 1.33) {
+    console.log('hit!');
+    startSpeed = 0.5;
+  }
 
   if (rightPressed) {
-    carX += 3.5;
-    if (carX + carWidth > canvas.width) {
-      carX = canvas.width - carWidth;
+    racerX += 3.5;
+    if (racerX + racerWidth > canvas.width - 58) {
+      racerX = canvas.width - racerWidth - 58;
     }
   }
 
   if (leftPressed) {
-    carX -= 3.5;
-    if (carX < 0) {
-      carX = 0;
+    racerX -= 3.5;
+    if (racerX < 58) {
+      racerX = 58;
     }
   }
 
@@ -181,8 +209,6 @@ setInterval(draw, 1000 / framesPerSecond);
 
 // Determined by time to finish
 
-
-
 // Could make it side by side with same obstacles
 
 // How hard to make it twist and turn
@@ -190,3 +216,25 @@ setInterval(draw, 1000 / framesPerSecond);
 // Collision detection
   // calculating hit boxes
   // sandbox that and consolelog it
+
+
+/* // Need TO DO:
+Make obstacles disappear when colliding and slow speed
+Make obstacles show at random
+  - best at set distances
+Give obstacles images
+Add finish line
+Animate background
+Add nice text
+Add start screen and play button
+
+
+NICE TO HAVES
+Alert that obstacle is coming
+Add game win screen
+Add power ups
+Timer in 00:00:00 format
+Add music
+Add high scores
+
+*/
