@@ -4,6 +4,15 @@
   background: #fff;
 }
 
+#play-screen {
+  display: block;
+  position: absolute;
+  font-family: "Bungee Inline";
+  font-size: 72px;
+  top: 360px;
+  left: 240px;
+}
+
 canvas {
   background: url('../images/nebula.gif') center;
   /* https://i.pinimg.com/originals/b1/bd/c1/b1bdc1ae539dcbd1a7c33cef3e5f2d9a.gif */

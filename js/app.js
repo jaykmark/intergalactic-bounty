@@ -4,21 +4,8 @@ const ctx = canvas.getContext("2d");
 const $background = $("#background");
 const $ctx = $("#myCanvas")[0].getContext("2d");
 
-// $(document).ready(function() {
-//   $background.on('click', () => {
-//   console.log('clicked!');
-//   $ctx.clearRect(0, 0, canvas.width, canvas.height);	
-//   play();
-  
-//   });
-// })
-
-const start = () => {
-  $('#play-screen').css('display','none');
-}
-
 // Overall Distance (allows for finish line)
-let distance = 20;
+let distance = 50;
 
 // Time at Start
 let time = 0;
@@ -37,11 +24,10 @@ let yWin = canvas.height;
 let rightPressed = false;
 let leftPressed = false;
 
-$(background)
-
 // Key Press Event Listeners
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
+canvas.addEventListener("click", letsPlay, false);
 
 // https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Paddle_and_keyboard_controls
 function keyDownHandler(e) {
@@ -58,6 +44,23 @@ function keyUpHandler(e) {
   } else if (e.key == "Left" || e.key == "ArrowLeft") {
       leftPressed = false;
   }
+}
+
+const drawStartScreen = () => {
+  ctx.font = "72px Bungee Inline";
+  ctx.fillStyle = "yellow";
+  ctx.fillText('BIG', canvas.width / 2 - 75, 275);
+  ctx.fillText('BANG', canvas.width / 2 - 105, 350);
+  ctx.fillText('BOUNTY', canvas.width / 2 - 157, 425);
+  ctx.font = "24px Bungee Inline";
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fillText('- CLICK TO PLAY -', canvas.width / 2 - 113, 575);
+}
+
+const start = () => {
+  $("#play-screen").css("display","none");
+  $("#click").css("display","none");
+  setInterval(play, 1000 / framesPerSecond);
 }
 
 // Timer (currently set every millisecond)
@@ -120,6 +123,10 @@ const drawDistance = () => {
   ctx.fillStyle = "#FFFFFF";
   ctx.fillText(`${Math.floor(distance)},000`, canvas.width - 465, canvas.height - 40);
   ctx.fillText('Light Years Away', canvas.width - 465, canvas.height - 15);
+  if (distance === 0) {
+    ctx.clearRect(canvas.width - 465, canvas.height - 60, 100, 25);
+    ctx.fillText('- - -', canvas.width - 463, canvas.height - 40);
+  }
 }
 
 const drawRacer = () => {
@@ -136,15 +143,15 @@ const drawRacer = () => {
 const drawHitbox = () => {
   ctx.beginPath();
   ctx.rect(racerX, canvas.height - racerHeight * 1.40, racerWidth, canvas.height - 50);
-  ctx.fillStyle = "#FFFFFF";
+  ctx.fillStyle = "yellow";
   ctx.fill();
   ctx.closePath();
 }
 
 const drawWin = () => {
-  ctx.font = "48px Bungee Inline";
+  ctx.font = "72px Bungee Inline";
   ctx.fillStyle = "yellow";
-  ctx.fillText("GOT EEEM", canvas.width / 2 - 125, yWin);
+  ctx.fillText("GOT EEEM", canvas.width / 2 - 182.5, yWin);
 }
 
 let obstacles = [];
@@ -156,7 +163,7 @@ obstacles[0] = {
 
 // Overall Function to Run Game
 const play = () => {
-  ctx.clearRect(0, 0, canvas.width, canvas.height * 100);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   // drawHitbox();
   drawRacer();
   drawTime();
@@ -204,7 +211,7 @@ const play = () => {
     // Collision Detection - restarts speed to 2
     if (obstacles[i].x + 38 > racerX && obstacles[i].x + 38 < racerX + racerWidth && obstacles[i].y > canvas.height - racerHeight * 2 && obstacles[i].y < canvas.height - 85) {
       ctx.drawImage(explosion, obstacles[i].x - 70, obstacles[i].y - 10, 200, 200);
-      obstacles[i].y += 1;
+      obstacles[i].y += startSpeed;
       startSpeed = 0.75;
     } else if (obstacles[i].x + 38 > racerX && obstacles[i].x + 38 < racerX + racerWidth && obstacles[i].y > canvas.height - racerHeight * 1.4) {
       ctx.drawImage(explosion, obstacles[i].x - 70, obstacles[i].y - 10, 200, 200);
@@ -231,7 +238,16 @@ const play = () => {
   }
 }
 
-setInterval(play, 1000 / framesPerSecond);
+drawStartScreen();
+
+function letsPlay() {
+  // $("#myCanvas").on("click", () => {
+  $("#myCanvas").off("click");
+  console.log("clicked!");
+  $ctx.clearRect(0, 0, canvas.width, canvas.height);	
+  start();
+  // });
+}
 
 // User Story
 
