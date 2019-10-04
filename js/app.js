@@ -1,7 +1,21 @@
-// iframe
-
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
+
+const $background = $("#background");
+const $ctx = $("#myCanvas")[0].getContext("2d");
+
+$(document).ready(function() {
+  $background.on('click', () => {
+  console.log('clicked!');
+  $ctx.clearRect(0, 0, canvas.width, canvas.height);	
+  play();
+  setInterval(game, 1000 / framesPerSecond);
+  });
+})
+
+const play = () => {
+  $('#play-screen').css('display','none');
+}
 
 // Time at Start
 let time = 0;
@@ -13,29 +27,17 @@ let racerWidth = 75;
 let racerX = (canvas.width - racerWidth) / 2;
 
 // Obstacle Position / Dimensions
-let xLeft = canvas.width / 4 - 60;
-let yLeft = canvas.height - 600;
-
-let xMiddle = canvas.width / 2 - 37;
-let yMiddle = canvas.height - 600;
-
-let xRight = canvas.width * 3 / 4 - 12;
-let yRight = canvas.height - 600;
-
-let yObstacle = canvas.height - 620
-
-let yFinish = canvas.height - 650;
-
-let obstacleRadius = 10; // make it a variable later
+let yFinish = 0;
 
 // Key Press Default State 
 let rightPressed = false;
 let leftPressed = false;
 
+$(background)
+
 // Key Press Event Listeners
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
-
 
 // https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Paddle_and_keyboard_controls
 function keyDownHandler(e) {
@@ -54,7 +56,7 @@ function keyUpHandler(e) {
   }
 }
 
-// Timer (currently set every second)
+// Timer (currently set every millisecond)
 const timer = setInterval(() => {
   time++;
   Number.time;
@@ -65,12 +67,13 @@ const timer = setInterval(() => {
 
 const convertTime = (time) => { // Carson
   let totalSeconds = (time/100);
-  let minutes = Math.floor(totalSeconds/60)
-  let remainingSeconds = Math.floor(totalSeconds % 60)
-  let remainingMiliseconds = time % 100
+  let minutes = Math.floor(totalSeconds/60);
+  let remainingSeconds = Math.floor(totalSeconds % 60);
+  let remainingMiliseconds = time % 100;
   let roundedMS = Math.floor(remainingMiliseconds)
-  let minutesFormatted = ('0' + minutes).slice(-2)
-  let secondsFormatted = ('0' + remainingSeconds).slice(-2)
+  let minutesFormatted = ('0' + minutes).slice(-2);
+  let secondsFormatted = ('0' + remainingSeconds).slice(-2);
+  let msFormatted = (roundedMS + '0').slice(2);
   return(`${minutesFormatted}:${secondsFormatted}:${roundedMS}`);
 }
 
@@ -81,25 +84,26 @@ const drawTime = () => {
 }
 
 // Overall speed of game
-let startSpeed = 1;
-let maxSpeed = 5;
+let startSpeed = 2;
+let maxSpeed = 10;
 
 const gameSpeed = setInterval(() => {
-    startSpeed += 0.25;
+    startSpeed += 0.15;
     console.log(startSpeed);
     if (startSpeed >= maxSpeed) {
+      clearInterval(gameSpeed);
+    }
+    if (distance <= 0) {
       clearInterval(gameSpeed);
     }
   }, 500)
 
 // Overall Distance (allows for finish line)
-let distance = 150;
-let meteorInterval = 0
+let distance = 50;
 
 // Distance is calculated every second
 const distanceToFinish = setInterval(() => {
   distance -= startSpeed;
-  meteorInterval += startSpeed;
   // console.log(meteorInterval);
   // console.log(`Distance to Finish: ${distance}`);
   if (distance <= 0) {
@@ -126,15 +130,6 @@ const drawRacer = () => {
     ctx.closePath();
 }
 
-const collisionDetection = () => {
-  for (let i = 0; i < obstacle.length; i++) {
-    let o = obstacle[i];
-    
-  }
-}
-
-const lanes = [{x:xRight,y:canvas.height - 620},{x:xMiddle,y:canvas.height - 620},{x:xLeft,y:canvas.height - 620}]
-
 let obstacles = [];
 
 obstacles[0] = {
@@ -142,26 +137,13 @@ obstacles[0] = {
   y: 0
 }
 
-const drawFinish = () => {
-  ctx.beginPath();
-  ctx.rect(0, yFinish, canvas.width, 75);
-  ctx.fillStyle = "#000000";
-  ctx.fill();
-  ctx.closePath();
-}
-
 // Overall Function to Run Game
-const draw = () => {
+const game = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height * 100);
   drawRacer();
   drawTime();
   drawDistance();
-
-  if (xMiddle > racerX && xMiddle < racerX + racerWidth && yMiddle + startSpeed < racerHeight && yMiddle + startSpeed > canvas.height - racerHeight * 1.33) {
-    console.log('hit!');
-    startSpeed = 0.5;
-  }
-
+  
   if (rightPressed) {
     racerX += 3.5;
     if (racerX + racerWidth > canvas.width - 58) {
@@ -176,51 +158,51 @@ const draw = () => {
     }
   }
 
-    let asteroid = new Image();
-    asteroid.src = "./images/meteor.png";
+  let asteroid = new Image();
+  asteroid.src = "./images/meteor.png";
+
+  // https://banner2.kisspng.com/20180406/aaw/kisspng-pixel-art-death-star-death-star-5ac75cab1155d1.312653581523014827071.jpg
+  let deathstar = new Image();
+  deathstar.src = "./images/deathstar.png"
+
+  if (distance === 0) {
+  ctx.drawImage(deathstar, canvas.width / 2 - 130, yFinish - 100, 250, 200);
+    if (yFinish <= 250) {
+    yFinish += 1.5;
+    }
+  }
 
   for (let i = 0; i < obstacles.length; i++) {
     ctx.drawImage(asteroid, obstacles[i].x, obstacles[i].y, 75, 150);
     obstacles[i].y += startSpeed;
+    // Collision Detection - restarts speed to 2
+    if (obstacles[i].x + 38 > racerX && obstacles[i].x + 38 < racerX + racerWidth && obstacles[i].y > canvas.height - racerHeight * 1.5 && obstacles[i].y < canvas.height - 50) {
+      startSpeed = 2;
+    }
+    if (distance === 0) {
+      return;
+    }
   }
-  if (obstacles[obstacles.length-1].y > 500) {
+
+  if (obstacles[obstacles.length - 1].y > 400) {
     obstacles.push(
-      {
-        x: Math.floor(Math.random() * ((canvas.width - 133) - 58 + 1) + 58),
-        y: 0
-      })
+    {
+      x: Math.floor(Math.random() * ((canvas.width - 133) - 58 + 1) + 58),
+      y: 0
+    })
+    if (distance === 0) {
+      return;
+    }
+  }
+
+  if (distance === 0) {
+    // const drawDistance = () => {
+      ctx.font = "18px Bungee Inline";
+      ctx.fillstyle = "#FFFFFF";
+      ctx.fillText(`GOT EEEEM`, canvas.width - 200, canvas.height - 100);
+    // }
   }
 }
-
-setInterval(draw, 1000 / framesPerSecond);
-
-
-// const drawObstacle = () => {
-//   let randomValue = Math.floor(Math.random() * lanes.length)
-//   return lanes[randomValue];
-// }
-
-// const setup = () => {
-//   obstacles.push(drawObstacle());
-// console.log(obstacles)
-// }
-
-// const createObstacles = () => {
-//   obstacle.forEach((ship) => {
-//     ctx.beginPath();
-//     ctx.arc(ship.x, ship.y, obstacleRadius, 10, 0, Math.PI*2);
-//     ctx.fillStyle = "#FF1301";
-//     ctx.fill();
-//     ctx.closePath();
-// });
-// }
-
-// setInterval(() => {
-// // setup();
-// }, 3000);
-
-
-
 
 // User Story
 // Press Play
@@ -237,12 +219,7 @@ setInterval(draw, 1000 / framesPerSecond);
 
 // How hard to make it twist and turn
 
-// Collision detection
-  // calculating hit boxes
-  // sandbox that and consolelog it
-
-
-/* // Need TO DO:
+/* NEED TO DO:
 Make obstacles disappear when colliding and slow speed
 Make obstacles show at random
   - best at set distances
@@ -259,45 +236,4 @@ Add game win screen
 Add power ups
 Timer in 00:00:00 format
 Add music
-Add high scores
-
-*/
-
-// // Obstacle in Left Lane
-// const drawObstacleLeft = () => {
-//   ctx.beginPath();
-//   ctx.arc(xLeft, yLeft, obstacleRadius, 10, 0, Math.PI*2);
-//   ctx.fillStyle = "#FF1301";
-//   ctx.fill();
-//   ctx.closePath();
-// }
-
-// // Obstacle in Middle Lane
-// const drawObstacleMiddle = () => {
-//     ctx.beginPath();
-//     ctx.arc(xMiddle, yMiddle, obstacleRadius, 10, 0, Math.PI*2);
-//     ctx.fillStyle = "#FF1301";
-//     ctx.fill();
-//     ctx.closePath();
-// }
-// Store an array with objects with x & y; push random objects to that
-// draw animation will keep looping
-// set a threshhold that will allow the 
-
-// Obstacle in Right Lane
-// const drawObstacleRight = () => {
-//   setInterval(()=>{
-//     ctx.beginPath();
-//     ctx.arc(xRight, yRight, obstacleRadius, 10, 0, Math.PI*2);
-//     ctx.fillStyle = "#FF1301";
-//     ctx.fill();
-//     ctx.closePath();
-//     draw();
-//   },2000)
-// }
-
-// obstacleFunctions = [drawObstacleLeft(), drawObstacleMiddle(), drawObstacleRight()]
-
-// const randomObstacle = setInterval(() => {
-//   return obstacleFunctions[Math.floor(Math.random() * obstacleFunctions.length)];
-// }, 1000);
+Add high scores */
