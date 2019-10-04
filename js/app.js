@@ -4,18 +4,21 @@ const ctx = canvas.getContext("2d");
 const $background = $("#background");
 const $ctx = $("#myCanvas")[0].getContext("2d");
 
-$(document).ready(function() {
-  $background.on('click', () => {
-  console.log('clicked!');
-  $ctx.clearRect(0, 0, canvas.width, canvas.height);	
-  play();
-  setInterval(game, 1000 / framesPerSecond);
-  });
-})
+// $(document).ready(function() {
+//   $background.on('click', () => {
+//   console.log('clicked!');
+//   $ctx.clearRect(0, 0, canvas.width, canvas.height);	
+//   play();
+  
+//   });
+// })
 
 const play = () => {
   $('#play-screen').css('display','none');
 }
+
+// Overall Distance (allows for finish line)
+let distance = 75;
 
 // Time at Start
 let time = 0;
@@ -73,14 +76,14 @@ const convertTime = (time) => { // Carson
   let roundedMS = Math.floor(remainingMiliseconds)
   let minutesFormatted = ('0' + minutes).slice(-2);
   let secondsFormatted = ('0' + remainingSeconds).slice(-2);
-  let msFormatted = (roundedMS + '0').slice(2);
-  return(`${minutesFormatted}:${secondsFormatted}:${roundedMS}`);
+  let msFormatted = ('0' + roundedMS).slice(-2);
+  return(`${minutesFormatted}'${secondsFormatted}'${msFormatted}`);
 }
 
 const drawTime = () => {
   ctx.font = "48px Bungee Inline";
   ctx.fillStyle = "#FFFFFF";
-  ctx.fillText(`${convertTime(time)}`, canvas.width / 2 - 120, 75);
+  ctx.fillText(`${convertTime(time)}`, canvas.width / 2 - 120, 125);
 }
 
 // Overall speed of game
@@ -97,9 +100,6 @@ const gameSpeed = setInterval(() => {
       clearInterval(gameSpeed);
     }
   }, 500)
-
-// Overall Distance (allows for finish line)
-let distance = 50;
 
 // Distance is calculated every second
 const distanceToFinish = setInterval(() => {
@@ -130,6 +130,14 @@ const drawRacer = () => {
     ctx.closePath();
 }
 
+const drawHitbox = () => {
+  ctx.beginPath();
+  ctx.rect(racerX, canvas.height - racerHeight * 1.40, racerWidth, canvas.height - 50);
+  ctx.fillStyle = "#FFFFFF";
+  ctx.fill();
+  ctx.closePath();
+}
+
 let obstacles = [];
 
 obstacles[0] = {
@@ -140,6 +148,7 @@ obstacles[0] = {
 // Overall Function to Run Game
 const game = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height * 100);
+  // drawHitbox();
   drawRacer();
   drawTime();
   drawDistance();
@@ -158,27 +167,44 @@ const game = () => {
     }
   }
 
+
+  // let explosion = newImage();
+  // explosion.src = "./images/explosion.gif";
+
   let asteroid = new Image();
   asteroid.src = "./images/meteor.png";
+
+  let explosion = new Image();
+  explosion.src = "./images/explosion.gif";
 
   // https://banner2.kisspng.com/20180406/aaw/kisspng-pixel-art-death-star-death-star-5ac75cab1155d1.312653581523014827071.jpg
   let deathstar = new Image();
   deathstar.src = "./images/deathstar.png"
 
+
   if (distance === 0) {
-  ctx.drawImage(deathstar, canvas.width / 2 - 130, yFinish - 100, 250, 200);
+  ctx.drawImage(deathstar, canvas.width / 2 - 130, yFinish - 100, 240, 200);
     if (yFinish <= 250) {
     yFinish += 1.5;
     }
   }
 
   for (let i = 0; i < obstacles.length; i++) {
-    ctx.drawImage(asteroid, obstacles[i].x, obstacles[i].y, 75, 150);
-    obstacles[i].y += startSpeed;
+    
     // Collision Detection - restarts speed to 2
-    if (obstacles[i].x + 38 > racerX && obstacles[i].x + 38 < racerX + racerWidth && obstacles[i].y > canvas.height - racerHeight * 1.5 && obstacles[i].y < canvas.height - 50) {
-      startSpeed = 2;
+    if (obstacles[i].x + 38 > racerX && obstacles[i].x + 38 < racerX + racerWidth && obstacles[i].y > canvas.height - racerHeight * 1.4 && obstacles[i].y < canvas.height - 85) {
+      ctx.drawImage(explosion, obstacles[i].x - 70, obstacles[i].y - 10, 200, 200);
+      obstacles[i].y += 3;
+      startSpeed = 0.75;
+      // if (obstacles[i].x + 38 > racerX && obstacles[i].x + 38 < racerX + racerWidth && obstacles[i].y > canvas.height - racerHeight * 1.4 && obstacles[i].y < canvas.height - 85 && obstacles[i].y > canvas.height - 85) {
+      //   ctx.drawImage(explosion, obstacles[i].x - 70, obstacles[i].y - 10, 200, 200);
+      //   obstacles[i].y += startSpeed;
+      // }
+    } else {
+      ctx.drawImage(asteroid, obstacles[i].x, obstacles[i].y, 75, 150);
+      obstacles[i].y += startSpeed;
     }
+    
     if (distance === 0) {
       return;
     }
@@ -197,43 +223,39 @@ const game = () => {
 
   if (distance === 0) {
     // const drawDistance = () => {
-      ctx.font = "18px Bungee Inline";
+      ctx.font = "48px Bungee Inline";
       ctx.fillstyle = "#FFFFFF";
       ctx.fillText(`GOT EEEEM`, canvas.width - 200, canvas.height - 100);
     // }
   }
 }
 
+setInterval(game, 1000 / framesPerSecond);
+
 // User Story
+
 // Press Play
-// Game automatically starts and accelerates at a set pace
 
-// User uses left/right or A/D to move between THREE lanes
+// Game starts and accelerates at a set pace
 
-// Different obstacles randomly get in the way and slow down 
+// User uses left/right or A/D to move between navigate the galaxy
+
+// Different obstacles randomly get in the way and slow down
   // Alerts will show up that obstacles are coming
 
-// Determined by time to finish
+// Game win is determined by time to finish
 
-// Could make it side by side with same obstacles
-
-// How hard to make it twist and turn
 
 /* NEED TO DO:
-Make obstacles disappear when colliding and slow speed
-Make obstacles show at random
-  - best at set distances
-Give obstacles images
-Add finish line
-Animate background
-Add nice text
+BETTER HITBOXES
 Add start screen and play button
-
+Add game win text
+Make obstacles disappear when colliding and slow speed
+Add nice text
 
 NICE TO HAVES
 Alert that obstacle is coming
 Add game win screen
 Add power ups
-Timer in 00:00:00 format
 Add music
 Add high scores */
