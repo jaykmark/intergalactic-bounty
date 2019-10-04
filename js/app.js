@@ -18,7 +18,7 @@ const play = () => {
 }
 
 // Overall Distance (allows for finish line)
-let distance = 75;
+let distance = 100;
 
 // Time at Start
 let time = 0;
@@ -183,23 +183,24 @@ const game = () => {
 
 
   if (distance === 0) {
-  ctx.drawImage(deathstar, canvas.width / 2 - 130, yFinish - 100, 240, 200);
+  ctx.drawImage(deathstar, canvas.width / 2 - 120, yFinish - 100, 240, 200);
     if (yFinish <= 250) {
     yFinish += 1.5;
     }
   }
 
+  // && obstacles[i].y < canvas.height
+
   for (let i = 0; i < obstacles.length; i++) {
     
     // Collision Detection - restarts speed to 2
-    if (obstacles[i].x + 38 > racerX && obstacles[i].x + 38 < racerX + racerWidth && obstacles[i].y > canvas.height - racerHeight * 1.4 && obstacles[i].y < canvas.height - 85) {
+    if (obstacles[i].x + 38 > racerX && obstacles[i].x + 38 < racerX + racerWidth && obstacles[i].y > canvas.height - racerHeight * 2 && obstacles[i].y < canvas.height - 85) {
       ctx.drawImage(explosion, obstacles[i].x - 70, obstacles[i].y - 10, 200, 200);
-      obstacles[i].y += 3;
+      obstacles[i].y += 1;
       startSpeed = 0.75;
-      // if (obstacles[i].x + 38 > racerX && obstacles[i].x + 38 < racerX + racerWidth && obstacles[i].y > canvas.height - racerHeight * 1.4 && obstacles[i].y < canvas.height - 85 && obstacles[i].y > canvas.height - 85) {
-      //   ctx.drawImage(explosion, obstacles[i].x - 70, obstacles[i].y - 10, 200, 200);
-      //   obstacles[i].y += startSpeed;
-      // }
+    } else if (obstacles[i].x + 38 > racerX && obstacles[i].x + 38 < racerX + racerWidth && obstacles[i].y > canvas.height - racerHeight * 1.4) {
+      ctx.drawImage(explosion, obstacles[i].x - 70, obstacles[i].y - 10, 200, 200);
+      obstacles[i].y += startSpeed;
     } else {
       ctx.drawImage(asteroid, obstacles[i].x, obstacles[i].y, 75, 150);
       obstacles[i].y += startSpeed;
