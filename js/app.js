@@ -13,44 +13,20 @@ let racerWidth = 75;
 let racerX = (canvas.width - racerWidth) / 2;
 
 // Obstacle Position / Dimensions
-let xLeft = canvas.width / 4 - 25;
+let xLeft = canvas.width / 4 - 60;
 let yLeft = canvas.height - 600;
 
-let xMiddle = canvas.width / 2;
+let xMiddle = canvas.width / 2 - 37;
 let yMiddle = canvas.height - 600;
 
-let xRight = canvas.width * 3 / 4 + 25;
+let xRight = canvas.width * 3 / 4 - 12;
 let yRight = canvas.height - 600;
+
+let yObstacle = canvas.height - 620
 
 let yFinish = canvas.height - 650;
 
 let obstacleRadius = 10; // make it a variable later
-
-// Overall speed of game
-let startSpeed = 1;
-let maxSpeed = 8;
-
-const gameSpeed = setInterval(() => {
-    startSpeed += 0.5;
-    console.log(startSpeed);
-    if (startSpeed >= maxSpeed) {
-      clearInterval(gameSpeed);
-    }
-  }, 500)
-
-
-// Overall Distance (allows for finish line)
-let distance = 300;
-
-// Distance is calculated every second
-const distanceToFinish = setInterval(() => {
-  distance -= startSpeed;
-  // console.log(`Distance to Finish: ${distance}`);
-  if (distance <= 0) {
-    clearInterval(distanceToFinish);
-    distance = 0;
-  }
-}, 750);
 
 // Key Press Default State 
 let rightPressed = false;
@@ -93,33 +69,51 @@ const convertTime = (time) => { // Carson
   let remainingSeconds = Math.floor(totalSeconds % 60)
   let remainingMiliseconds = time % 100
   let roundedMS = Math.floor(remainingMiliseconds)
-  return(`${minutes}:${remainingSeconds}:${roundedMS}`)
-  }
+  let minutesFormatted = ('0' + minutes).slice(-2)
+  let secondsFormatted = ('0' + remainingSeconds).slice(-2)
+  return(`${minutesFormatted}:${secondsFormatted}:${roundedMS}`);
+}
 
 const drawTime = () => {
   ctx.font = "48px Bungee Inline";
   ctx.fillStyle = "#FFFFFF";
-  ctx.fillText(`${convertTime(time)}`, canvas.width / 2 - 75, 75);
+  ctx.fillText(`${convertTime(time)}`, canvas.width / 2 - 120, 75);
 }
+
+// Overall speed of game
+let startSpeed = 1;
+let maxSpeed = 5;
+
+const gameSpeed = setInterval(() => {
+    startSpeed += 0.25;
+    console.log(startSpeed);
+    if (startSpeed >= maxSpeed) {
+      clearInterval(gameSpeed);
+    }
+  }, 500)
+
+// Overall Distance (allows for finish line)
+let distance = 150;
+let meteorInterval = 0
+
+// Distance is calculated every second
+const distanceToFinish = setInterval(() => {
+  distance -= startSpeed;
+  meteorInterval += startSpeed;
+  // console.log(meteorInterval);
+  // console.log(`Distance to Finish: ${distance}`);
+  if (distance <= 0) {
+    clearInterval(distanceToFinish);
+    distance = 0;
+  }
+}, 750);
 
 const drawDistance = () => {
   ctx.font = "18px Bungee Inline";
   ctx.fillstyle = "#FFFFFF";
-  ctx.fillText(`${distance}`, canvas.width - 465, canvas.height - 40);
+  ctx.fillText(`${Math.floor(distance)},000`, canvas.width - 465, canvas.height - 40);
   ctx.fillText('Light Years Away', canvas.width - 465, canvas.height - 15);
 }
-
-// Millisecond to string format
-// const milisecondTimer = (time) => {
-//   // let msec_num = parseInt(this, 10);
-//   let min = Math.floor(time / 6000);
-//   let sec = Math.floor((time - (min * 6000)) / 100)
-//   let milisec = time - (min * 6000) - (minutes * 60);
-//   if (min < 10) {min = "0" + min}
-//   if (sec < 10) {sec = "0" + sec}
-//   if (milisec < 10) {milisec = "0" + milisec}
-//   return `${min}:${sec}:${milisec}`;
-// }
 
 const drawRacer = () => {
     ctx.beginPath();
@@ -127,42 +121,25 @@ const drawRacer = () => {
     // https://myrealdomain.com/images/8-bit-spaceship-1.png
     racer.src = "./images/cruiser.png";
     // racer.onload = function() {
-        ctx.drawImage(racer, racerX, canvas.height - racerHeight * 1.33, racerWidth, racerHeight);
+        ctx.drawImage(racer, racerX, canvas.height - racerHeight * 1.45, racerWidth, racerHeight);
     // }
     ctx.closePath();
+}
+
+const collisionDetection = () => {
+  for (let i = 0; i < obstacle.length; i++) {
+    let o = obstacle[i];
+    
   }
-
-// Obstacle in Left Lane
-const drawObstacleLeft = () => {
-  ctx.beginPath();
-  ctx.arc(xLeft, yLeft, obstacleRadius, 10, 0, Math.PI*2);
-  ctx.fillStyle = "#FF1301";
-  ctx.fill();
-  ctx.closePath();
 }
 
-// Create Obstacle
+const lanes = [{x:xRight,y:canvas.height - 620},{x:xMiddle,y:canvas.height - 620},{x:xLeft,y:canvas.height - 620}]
+
 let obstacles = [];
-for (let i = 0; i < 2; i++) {
-  obstacles[i] = {x: 0, y: 0, status: 1};
-}
 
-// Obstacle in Middle Lane
-const drawObstacleMiddle = () => {
-    ctx.beginPath();
-    ctx.arc(xMiddle, yMiddle, obstacleRadius, 10, 0, Math.PI*2);
-    ctx.fillStyle = "#FF1301";
-    ctx.fill();
-    ctx.closePath();
-}
-
-// Obstacle in Right Lane
-const drawObstacleRight = () => {
-  ctx.beginPath();
-  ctx.arc(xRight, yRight, obstacleRadius, 10, 0, Math.PI*2);
-  ctx.fillStyle = "#FF1301";
-  ctx.fill();
-  ctx.closePath();
+obstacles[0] = {
+  x: Math.floor(Math.random() * ((canvas.width - 58) - 100 + 1) + 58),
+  y: 0
 }
 
 const drawFinish = () => {
@@ -175,20 +152,11 @@ const drawFinish = () => {
 
 // Overall Function to Run Game
 const draw = () => {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, canvas.width, canvas.height * 100);
   drawRacer();
   drawTime();
   drawDistance();
-  drawObstacleLeft();
-  drawObstacleMiddle();
-  drawObstacleRight();
 
-  // Tries to make a finish line at end
-  // if (distance <= 3) {
-  //   drawFinish();
-  //   } 
-
-  // If obstacle hits racer, slow down and make it disappear
   if (xMiddle > racerX && xMiddle < racerX + racerWidth && yMiddle + startSpeed < racerHeight && yMiddle + startSpeed > canvas.height - racerHeight * 1.33) {
     console.log('hit!');
     startSpeed = 0.5;
@@ -208,13 +176,50 @@ const draw = () => {
     }
   }
 
-  yLeft += startSpeed;
-  yMiddle += startSpeed;
-  yRight += startSpeed;
-  yFinish += startSpeed;
+    let asteroid = new Image();
+    asteroid.src = "./images/meteor.png";
+
+  for (let i = 0; i < obstacles.length; i++) {
+    ctx.drawImage(asteroid, obstacles[i].x, obstacles[i].y, 75, 150);
+    obstacles[i].y += startSpeed;
+  }
+  if (obstacles[obstacles.length-1].y > 500) {
+    obstacles.push(
+      {
+        x: Math.floor(Math.random() * ((canvas.width - 133) - 58 + 1) + 58),
+        y: 0
+      })
+  }
 }
 
 setInterval(draw, 1000 / framesPerSecond);
+
+
+// const drawObstacle = () => {
+//   let randomValue = Math.floor(Math.random() * lanes.length)
+//   return lanes[randomValue];
+// }
+
+// const setup = () => {
+//   obstacles.push(drawObstacle());
+// console.log(obstacles)
+// }
+
+// const createObstacles = () => {
+//   obstacle.forEach((ship) => {
+//     ctx.beginPath();
+//     ctx.arc(ship.x, ship.y, obstacleRadius, 10, 0, Math.PI*2);
+//     ctx.fillStyle = "#FF1301";
+//     ctx.fill();
+//     ctx.closePath();
+// });
+// }
+
+// setInterval(() => {
+// // setup();
+// }, 3000);
+
+
 
 
 // User Story
@@ -257,3 +262,42 @@ Add music
 Add high scores
 
 */
+
+// // Obstacle in Left Lane
+// const drawObstacleLeft = () => {
+//   ctx.beginPath();
+//   ctx.arc(xLeft, yLeft, obstacleRadius, 10, 0, Math.PI*2);
+//   ctx.fillStyle = "#FF1301";
+//   ctx.fill();
+//   ctx.closePath();
+// }
+
+// // Obstacle in Middle Lane
+// const drawObstacleMiddle = () => {
+//     ctx.beginPath();
+//     ctx.arc(xMiddle, yMiddle, obstacleRadius, 10, 0, Math.PI*2);
+//     ctx.fillStyle = "#FF1301";
+//     ctx.fill();
+//     ctx.closePath();
+// }
+// Store an array with objects with x & y; push random objects to that
+// draw animation will keep looping
+// set a threshhold that will allow the 
+
+// Obstacle in Right Lane
+// const drawObstacleRight = () => {
+//   setInterval(()=>{
+//     ctx.beginPath();
+//     ctx.arc(xRight, yRight, obstacleRadius, 10, 0, Math.PI*2);
+//     ctx.fillStyle = "#FF1301";
+//     ctx.fill();
+//     ctx.closePath();
+//     draw();
+//   },2000)
+// }
+
+// obstacleFunctions = [drawObstacleLeft(), drawObstacleMiddle(), drawObstacleRight()]
+
+// const randomObstacle = setInterval(() => {
+//   return obstacleFunctions[Math.floor(Math.random() * obstacleFunctions.length)];
+// }, 1000);
