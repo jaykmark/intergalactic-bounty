@@ -13,12 +13,12 @@ const $ctx = $("#myCanvas")[0].getContext("2d");
 //   });
 // })
 
-const play = () => {
+const start = () => {
   $('#play-screen').css('display','none');
 }
 
 // Overall Distance (allows for finish line)
-let distance = 100;
+let distance = 20;
 
 // Time at Start
 let time = 0;
@@ -31,6 +31,7 @@ let racerX = (canvas.width - racerWidth) / 2;
 
 // Obstacle Position / Dimensions
 let yFinish = 0;
+let yWin = canvas.height;
 
 // Key Press Default State 
 let rightPressed = false;
@@ -82,7 +83,11 @@ const convertTime = (time) => { // Carson
 
 const drawTime = () => {
   ctx.font = "48px Bungee Inline";
+  if (distance === 0) {
+    ctx.fillStyle = "yellow";
+  } else {
   ctx.fillStyle = "#FFFFFF";
+  }
   ctx.fillText(`${convertTime(time)}`, canvas.width / 2 - 120, 125);
 }
 
@@ -104,8 +109,6 @@ const gameSpeed = setInterval(() => {
 // Distance is calculated every second
 const distanceToFinish = setInterval(() => {
   distance -= startSpeed;
-  // console.log(meteorInterval);
-  // console.log(`Distance to Finish: ${distance}`);
   if (distance <= 0) {
     clearInterval(distanceToFinish);
     distance = 0;
@@ -114,7 +117,7 @@ const distanceToFinish = setInterval(() => {
 
 const drawDistance = () => {
   ctx.font = "18px Bungee Inline";
-  ctx.fillstyle = "#FFFFFF";
+  ctx.fillStyle = "#FFFFFF";
   ctx.fillText(`${Math.floor(distance)},000`, canvas.width - 465, canvas.height - 40);
   ctx.fillText('Light Years Away', canvas.width - 465, canvas.height - 15);
 }
@@ -138,6 +141,12 @@ const drawHitbox = () => {
   ctx.closePath();
 }
 
+const drawWin = () => {
+  ctx.font = "48px Bungee Inline";
+  ctx.fillStyle = "yellow";
+  ctx.fillText("GOT EEEM", canvas.width / 2 - 125, yWin);
+}
+
 let obstacles = [];
 
 obstacles[0] = {
@@ -146,7 +155,7 @@ obstacles[0] = {
 }
 
 // Overall Function to Run Game
-const game = () => {
+const play = () => {
   ctx.clearRect(0, 0, canvas.width, canvas.height * 100);
   // drawHitbox();
   drawRacer();
@@ -167,10 +176,6 @@ const game = () => {
     }
   }
 
-
-  // let explosion = newImage();
-  // explosion.src = "./images/explosion.gif";
-
   let asteroid = new Image();
   asteroid.src = "./images/meteor.png";
 
@@ -181,11 +186,14 @@ const game = () => {
   let deathstar = new Image();
   deathstar.src = "./images/deathstar.png"
 
-
   if (distance === 0) {
-  ctx.drawImage(deathstar, canvas.width / 2 - 120, yFinish - 100, 240, 200);
+    ctx.drawImage(deathstar, canvas.width / 2 - 120, yFinish - 100, 240, 200);
+    drawWin();
     if (yFinish <= 250) {
-    yFinish += 1.5;
+      yFinish += 1.5;
+    }
+    if (yWin >= canvas.height - 250) {
+      yWin -= 1.5;
     }
   }
 
@@ -221,17 +229,9 @@ const game = () => {
       return;
     }
   }
-
-  if (distance === 0) {
-    // const drawDistance = () => {
-      ctx.font = "48px Bungee Inline";
-      ctx.fillstyle = "#FFFFFF";
-      ctx.fillText(`GOT EEEEM`, canvas.width - 200, canvas.height - 100);
-    // }
-  }
 }
 
-setInterval(game, 1000 / framesPerSecond);
+setInterval(play, 1000 / framesPerSecond);
 
 // User Story
 
@@ -250,13 +250,10 @@ setInterval(game, 1000 / framesPerSecond);
 /* NEED TO DO:
 BETTER HITBOXES
 Add start screen and play button
-Add game win text
-Make obstacles disappear when colliding and slow speed
-Add nice text
+Add game win text/screen
 
 NICE TO HAVES
 Alert that obstacle is coming
-Add game win screen
 Add power ups
 Add music
 Add high scores */
