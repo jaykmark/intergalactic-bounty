@@ -4,7 +4,7 @@ const ctx = canvas.getContext("2d");
 const $background = $("#background");
 
 // Overall distance of game
-let distance = 10;
+let distance = 150;
 
 // Overall speed of game
 let startSpeed = 2;
@@ -222,8 +222,10 @@ const play = () => {
   }
 }
 
+// Start screen
 drawStartScreen();
 
+// Click to Play functionality
 function playGame() {
   $("#myCanvas").on("click", () => {
     $("#myCanvas").off("click");
@@ -259,23 +261,3 @@ function keyUpHandler(e) {
 }
 
 
-// USER STORY
-
-// YOU ARE AN INTERGALACTIC COWBOY THAT HAS BEEN ASSIGNED A NEW BOUNTY. THERE'S A TON OF COMPETITION SO YOU GOTTA GET THERE FAST. YOU KNOW A SHORT CUT, BUT IT'S THROUGH A METEOR BELT. "IF YOU AIN'T FIRST, YOU'RE LAST!"
-
-// Click screen to play
-
-// Game starts and accelerates at a set pace
-
-// Use left/right or A/D to move between navigate the galaxy
-
-// Obstacles randomly get in the way and slow you down if you get hit
-
-// Catch your bounty as fast as you can!
-
-
-/* NICE TO HAVES:
-Alert that obstacle is coming
-Add power ups
-Add music
-Add high scores */
