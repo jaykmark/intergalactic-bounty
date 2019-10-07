@@ -2,49 +2,35 @@ const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
 
 const $background = $("#background");
-const $ctx = $("#myCanvas")[0].getContext("2d");
 
-// Overall Distance (allows for finish line)
-let distance = 50;
+// Overall distance of game
+let distance = 10;
 
-// Time at Start
+// Overall speed of game
+let startSpeed = 2;
+let maxSpeed = 10;
+
+// Time at start
 let time = 0;
+
+// Game framerate
 let framesPerSecond = 200;
 
-// racer Dimensions
+// Racer dimensions
 let racerHeight = 125;
 let racerWidth = 75;
 let racerX = (canvas.width - racerWidth) / 2;
 
-// Obstacle Position / Dimensions
+// Array to hold obstacles
+let obstacles = [];
+
+// Obstacle and Finish positions
 let yFinish = 0;
 let yWin = canvas.height;
 
-// Key Press Default State 
+// Key press default state
 let rightPressed = false;
 let leftPressed = false;
-
-// Key Press Event Listeners
-document.addEventListener("keydown", keyDownHandler, false);
-document.addEventListener("keyup", keyUpHandler, false);
-canvas.addEventListener("click", letsPlay, false);
-
-// https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Paddle_and_keyboard_controls
-function keyDownHandler(e) {
-  if (e.key == "Right" || e.key == "ArrowRight") {
-      rightPressed = true;
-  } else if (e.key == "Left" || e.key == "ArrowLeft") {
-      leftPressed = true;
-  }
-}
-
-function keyUpHandler(e) {
-  if (e.key == "Right" || e.key == "ArrowRight") {
-      rightPressed = false;
-  } else if (e.key == "Left" || e.key == "ArrowLeft") {
-      leftPressed = false;
-  }
-}
 
 const drawStartScreen = () => {
   ctx.font = "72px Bungee Inline";
@@ -57,21 +43,17 @@ const drawStartScreen = () => {
   ctx.fillText('- CLICK TO PLAY -', canvas.width / 2 - 113, 575);
 }
 
-const start = () => {
-  $("#play-screen").css("display","none");
-  $("#click").css("display","none");
-  setInterval(play, 1000 / framesPerSecond);
-}
-
-// Timer (currently set every millisecond)
-const timer = setInterval(() => {
-  time++;
-  Number.time;
+// In-game timer (currently set every millisecond)
+const timer = () => {setInterval(function(){
   if (distance <= 0) {
     clearInterval(timer);
-  }
-}, 10)
+  } else {
+  time++
+  Number.time;
+  }}, 10)
+}
 
+// Convert time to 00'00"00
 const convertTime = (time) => { // Carson
   let totalSeconds = (time/100);
   let minutes = Math.floor(totalSeconds/60);
@@ -84,6 +66,7 @@ const convertTime = (time) => { // Carson
   return(`${minutesFormatted}'${secondsFormatted}'${msFormatted}`);
 }
 
+// Draw time on game screen
 const drawTime = () => {
   ctx.font = "48px Bungee Inline";
   if (distance === 0) {
@@ -94,30 +77,29 @@ const drawTime = () => {
   ctx.fillText(`${convertTime(time)}`, canvas.width / 2 - 120, 125);
 }
 
-// Overall speed of game
-let startSpeed = 2;
-let maxSpeed = 10;
-
-const gameSpeed = setInterval(() => {
+// In-game speed
+const gameSpeed = () => {setInterval(function() {
+  if (startSpeed >= maxSpeed) {
+    clearInterval(gameSpeed);
+  }
+  if (distance <= 0) {
+    clearInterval(gameSpeed);
+  } else {
     startSpeed += 0.15;
     console.log(startSpeed);
-    if (startSpeed >= maxSpeed) {
-      clearInterval(gameSpeed);
-    }
-    if (distance <= 0) {
-      clearInterval(gameSpeed);
-    }
-  }, 500)
+  }}, 500)
+}
 
-// Distance is calculated every second
-const distanceToFinish = setInterval(() => {
-  distance -= startSpeed;
+// In-game distance tracker
+const distanceToFinish = () => {setInterval (function() {
   if (distance <= 0) {
     clearInterval(distanceToFinish);
     distance = 0;
-  }
-}, 750);
+  } else {
+    distance -= startSpeed;
+  }}, 500)}
 
+// Draw distance on game screen
 const drawDistance = () => {
   ctx.font = "18px Bungee Inline";
   ctx.fillStyle = "#FFFFFF";
@@ -129,6 +111,7 @@ const drawDistance = () => {
   }
 }
 
+// Draw racer on game screen
 const drawRacer = () => {
     ctx.beginPath();
     let racer = new Image();
@@ -140,6 +123,7 @@ const drawRacer = () => {
     ctx.closePath();
 }
 
+// Hitbox of Racer (for testing)
 const drawHitbox = () => {
   ctx.beginPath();
   ctx.rect(racerX, canvas.height - racerHeight * 1.40, racerWidth, canvas.height - 50);
@@ -148,14 +132,14 @@ const drawHitbox = () => {
   ctx.closePath();
 }
 
+// Draw finish line on game screen
 const drawWin = () => {
-  ctx.font = "72px Bungee Inline";
+  ctx.font = "48px Bungee Inline";
   ctx.fillStyle = "yellow";
-  ctx.fillText("GOT EEEM", canvas.width / 2 - 182.5, yWin);
+  ctx.fillText("GOT EEEM", canvas.width / 2 - 125, yWin);
 }
 
-let obstacles = [];
-
+// First obstacle placeholder
 obstacles[0] = {
   x: Math.floor(Math.random() * ((canvas.width - 58) - 100 + 1) + 58),
   y: 0
@@ -169,6 +153,7 @@ const play = () => {
   drawTime();
   drawDistance();
   
+  // Key Right & Left
   if (rightPressed) {
     racerX += 3.5;
     if (racerX + racerWidth > canvas.width - 58) {
@@ -193,22 +178,20 @@ const play = () => {
   let deathstar = new Image();
   deathstar.src = "./images/deathstar.png"
 
+  // Draws Finish Line
   if (distance === 0) {
-    ctx.drawImage(deathstar, canvas.width / 2 - 120, yFinish - 100, 240, 200);
+    ctx.drawImage(deathstar, canvas.width / 2 - 215, yFinish - 100, 420, 350);
     drawWin();
-    if (yFinish <= 250) {
+    if (yFinish <= 210) {
       yFinish += 1.5;
     }
-    if (yWin >= canvas.height - 250) {
+    if (yWin >= canvas.height - 200) {
       yWin -= 1.5;
     }
   }
 
-  // && obstacles[i].y < canvas.height
-
   for (let i = 0; i < obstacles.length; i++) {
-    
-    // Collision Detection - restarts speed to 2
+    // Collision Detection - restarts speed
     if (obstacles[i].x + 38 > racerX && obstacles[i].x + 38 < racerX + racerWidth && obstacles[i].y > canvas.height - racerHeight * 2 && obstacles[i].y < canvas.height - 85) {
       ctx.drawImage(explosion, obstacles[i].x - 70, obstacles[i].y - 10, 200, 200);
       obstacles[i].y += startSpeed;
@@ -226,6 +209,7 @@ const play = () => {
     }
   }
 
+  // Pushes new obstacles to array
   if (obstacles[obstacles.length - 1].y > 400) {
     obstacles.push(
     {
@@ -240,35 +224,57 @@ const play = () => {
 
 drawStartScreen();
 
-function letsPlay() {
-  // $("#myCanvas").on("click", () => {
-  $("#myCanvas").off("click");
-  console.log("clicked!");
-  $ctx.clearRect(0, 0, canvas.width, canvas.height);	
-  start();
-  // });
+function playGame() {
+  $("#myCanvas").on("click", () => {
+    $("#myCanvas").off("click");
+    $("#play-screen").css("display","none");
+    $("#click").css("display","none");
+    timer();
+    gameSpeed();
+    distanceToFinish();
+    setInterval(play, 1000 / framesPerSecond);
+  })
 }
 
-// User Story
+// Key Press Event Listeners
+document.addEventListener("keydown", keyDownHandler, false);
+document.addEventListener("keyup", keyUpHandler, false);
+canvas.addEventListener("click", playGame(), false);
 
-// Press Play
+// https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Paddle_and_keyboard_controls
+function keyDownHandler(e) {
+  if (e.key == "Right" || e.key == "ArrowRight") {
+      rightPressed = true;
+  } else if (e.key == "Left" || e.key == "ArrowLeft") {
+      leftPressed = true;
+  }
+}
+
+function keyUpHandler(e) {
+  if (e.key == "Right" || e.key == "ArrowRight") {
+      rightPressed = false;
+  } else if (e.key == "Left" || e.key == "ArrowLeft") {
+      leftPressed = false;
+  }
+}
+
+
+// USER STORY
+
+// YOU ARE AN INTERGALACTIC COWBOY THAT HAS BEEN ASSIGNED A NEW BOUNTY. THERE'S A TON OF COMPETITION SO YOU GOTTA GET THERE FAST. YOU KNOW A SHORT CUT, BUT IT'S THROUGH A METEOR BELT. "IF YOU AIN'T FIRST, YOU'RE LAST!"
+
+// Click screen to play
 
 // Game starts and accelerates at a set pace
 
-// User uses left/right or A/D to move between navigate the galaxy
+// Use left/right or A/D to move between navigate the galaxy
 
-// Different obstacles randomly get in the way and slow down
-  // Alerts will show up that obstacles are coming
+// Obstacles randomly get in the way and slow you down if you get hit
 
-// Game win is determined by time to finish
+// Catch your bounty as fast as you can!
 
 
-/* NEED TO DO:
-BETTER HITBOXES
-Add start screen and play button
-Add game win text/screen
-
-NICE TO HAVES
+/* NICE TO HAVES:
 Alert that obstacle is coming
 Add power ups
 Add music
