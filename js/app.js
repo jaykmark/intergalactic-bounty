@@ -4,7 +4,7 @@ const ctx = canvas.getContext("2d");
 const $background = $("#background");
 
 // Overall distance of game
-let distance = 150;
+let distance = 300;
 
 // Overall speed of game
 let startSpeed = 2;
@@ -195,7 +195,7 @@ const play = () => {
     if (obstacles[i].x + 38 > racerX && obstacles[i].x + 38 < racerX + racerWidth && obstacles[i].y > canvas.height - racerHeight * 2 && obstacles[i].y < canvas.height - 85) {
       ctx.drawImage(explosion, obstacles[i].x - 70, obstacles[i].y - 10, 200, 200);
       obstacles[i].y += startSpeed;
-      startSpeed = 0.75;
+      startSpeed = 1.5;
     } else if (obstacles[i].x + 38 > racerX && obstacles[i].x + 38 < racerX + racerWidth && obstacles[i].y > canvas.height - racerHeight * 1.4) {
       ctx.drawImage(explosion, obstacles[i].x - 70, obstacles[i].y - 10, 200, 200);
       obstacles[i].y += startSpeed;
