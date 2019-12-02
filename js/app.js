@@ -35,8 +35,8 @@ let leftPressed = false;
 const drawStartScreen = () => {
   ctx.font = "72px Bungee Inline";
   ctx.fillStyle = "yellow";
-  ctx.fillText('BIG', canvas.width / 2 - 75, 275);
-  ctx.fillText('BANG', canvas.width / 2 - 105, 350);
+  ctx.fillText('INTER', canvas.width / 2 - 125, 275);
+  ctx.fillText('GALACTIC', canvas.width / 2 - 195, 350);
   ctx.fillText('BOUNTY', canvas.width / 2 - 157, 425);
   ctx.font = "24px Bungee Inline";
   ctx.fillStyle = "#FFFFFF";
